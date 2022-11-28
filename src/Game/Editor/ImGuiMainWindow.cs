@@ -9,6 +9,8 @@ namespace Game.Editor
 
         private bool _debugInfoWindow = false;
         private bool _rightDockWindow = true;
+        private bool _leftDockWindow = true;
+        private bool _logWindow = true;
 
         public ImGuiMainWindow(
             Game game,
@@ -22,7 +24,9 @@ namespace Game.Editor
         {
             DrawTopMenu();
             DrawDebugWindow();
+            DrawLeftDock();
             DrawRightDock();
+            DrawLogWindow();
         }
 
         public void DrawTopMenu()
@@ -49,14 +53,24 @@ namespace Game.Editor
 
                     if (ImGui.BeginMenu("Windows"))
                     {
+                        if (ImGui.MenuItem("Log"))
+                        {
+                            _logWindow = !_logWindow;
+                        }
+
                         if (ImGui.MenuItem("Debug info"))
                         {
-                            _debugInfoWindow = true;
+                            _debugInfoWindow = !_debugInfoWindow;
+                        }
+
+                        if (ImGui.MenuItem("Left dock"))
+                        {
+                            _leftDockWindow = !_leftDockWindow;
                         }
 
                         if (ImGui.MenuItem("Right dock"))
                         {
-                            _rightDockWindow = true;
+                            _rightDockWindow = !_rightDockWindow;
                         }
 
                         ImGui.EndMenu();
@@ -80,6 +94,7 @@ namespace Game.Editor
             {
                 ImGui.LabelText("Runtime", $"{_time.TotalTime} seconds");
                 ImGui.LabelText("FrameCount", _time.CurrentFrame.ToString());
+                ImGui.LabelText("FPS", _time.FramesPerSecond.ToString());
                 ImGui.LabelText("Avg. frameTime", $"{_time.AverageDeltaTimeF} ms");
                 ImGui.PlotLines(
                     string.Empty,
@@ -95,19 +110,70 @@ namespace Game.Editor
             }
         }
 
+        public void DrawLeftDock()
+        {
+            if (_leftDockWindow &&
+                ImGui.Begin("Left dock", ref _leftDockWindow,
+                    ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize))
+            {
+                var viewport = ImGui.GetMainViewport();
+
+                ImGui.SetWindowPos(
+                    new System.Numerics.Vector2(
+                        0.0f,
+                        ImGui.GetItemRectSize().Y));
+
+                ImGui.SetWindowSize(
+                    new System.Numerics.Vector2(
+                        350.0f,
+                        viewport.Size.Y - ImGui.GetItemRectSize().Y));
+
+                ImGui.End();
+            }
+        }
+
         public void DrawRightDock()
         {
             if (_rightDockWindow && 
                 ImGui.Begin("Right dock", ref _rightDockWindow,
                     ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize))
             {
+                var viewportSize = ImGui.GetMainViewport().WorkSize;
+
                 ImGui.SetWindowPos(
-                    new System.Numerics.Vector2(_game.ClientSize.X - 350.0f, 
+                    new System.Numerics.Vector2(
+                        viewportSize.X - 350.0f,
                         ImGui.GetItemRectSize().Y));
+
                 ImGui.SetWindowSize(
                     new System.Numerics.Vector2(
-                        350.0f, 
-                    _game.ClientSize.Y - ImGui.GetItemRectSize().Y));
+                        350.0f,
+                        viewportSize.Y));
+
+                ImGui.End();
+            }
+        }
+
+        public void DrawLogWindow()
+        {
+            if (_logWindow &&
+                ImGui.Begin("Log", ref _rightDockWindow))
+            {
+                var viewportSize = ImGui.GetMainViewport().WorkSize;
+
+                ImGui.SetWindowSize(
+                    new System.Numerics.Vector2(300.0f, 200.0f));
+
+                ImGui.SetWindowPos(
+                    new System.Numerics.Vector2(
+                        350.0f,
+                        viewportSize.Y + ImGui.GetItemRectSize().Y - 200.0f));
+
+                foreach (var logMessage in Logger.GetLogMessages())
+                {
+                    ImGui.Text(logMessage.ToString());
+                }
+
                 ImGui.End();
             }
         }

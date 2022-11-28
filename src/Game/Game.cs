@@ -177,6 +177,7 @@ namespace Game
             if (_camera!= null)
             {
                 _camera.AspectRatio = (float)e.Width / e.Height;
+                _controller.WindowResized(e.Width, e.Height);
             }
         }
 
