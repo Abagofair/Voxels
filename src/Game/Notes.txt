@@ -1,0 +1,16 @@
+﻿OpenTK stores matrices as row-major (see Matrix4.CreateTranslation), but since OpenGL expects column-major they are implicitly transposed.
+
+In the shaders i post-multiply with column-vectors. (https://austinmorlan.com/posts/opengl_matrices/)
+This means that in shaders it is 'gl_Position = Projection * View * Model * vec4(position, 1.0);' when transforming vertices to clip-space, but the same would need to be pre-multiplied in the client.
+
+Everything is left-handed (+z forward / +z into the screen)
+World / Model is default standard basis x = [1, 0, 0], y = [0, 1, 0], z = [0, 0, 1] and therefore left-handed
+Camera space is also left handed (the view matrix is created as a transposed row-major matrix, this means we need to yaw counter-clock wise to get a left-handed clockwise rotation around +Y)
+Perspective expects left-handed and maps z to [-1, 1]
+
++y
+|
+|   /+z
+|  /
+| /
+|/________+x
