@@ -6,6 +6,7 @@ namespace Game
     {
         private Matrix4 _matrix = Matrix4.Identity;
 
+        public Matrix4 Parent = Matrix4.Identity;
         public Vector3 Position = Vector3.Zero;
         public Quaternion Rotation = Quaternion.Identity;
         public Vector3 Scale = Vector3.One;
@@ -15,17 +16,13 @@ namespace Game
             get
             {
                 _matrix =
+                    Parent *
                     Matrix4.CreateScale(Scale) *
                     Matrix4.CreateFromQuaternion(Rotation) *
                     Matrix4.CreateTranslation(Position);
 
                 return ref _matrix;
             }
-        }
-
-        public void AddTransform(Transform transform)
-        {
-            _matrix *= transform.Matrix;
         }
     }
 }

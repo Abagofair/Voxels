@@ -47,7 +47,7 @@ namespace Game
             GL.BindVertexArray(0);
         }
 
-        public void Draw()
+        public void Render()
         {
             GL.BindVertexArray(_vao);
             GL.DrawElements(BeginMode.Triangles, _indexCount, DrawElementsType.UnsignedShort, 0);

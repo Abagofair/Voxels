@@ -2,6 +2,7 @@
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Game
 {
@@ -11,14 +12,29 @@ namespace Game
         public readonly static string ShaderFolder = "Shaders";
         public readonly static string TextureFolder = "Textures";
 
-        public static Shader CreateShader(string name)
+        public static readonly Dictionary<string, Shader> Shaders = new Dictionary<string, Shader>();
+
+        [return: NotNull]
+        public static Shader CreateOrGetShader(string name, ShaderType shaderType, bool reload)
         {
+            if (!reload && Shaders.TryGetValue(name, out Shader? shader))
+            {
+                return shader;
+            }
+
             string path = GetPath(name, ShaderFolder);
 
             string vertexCode = File.ReadAllText($"{path}.vert");
             string fragCode = File.ReadAllText($"{path}.frag");
 
-            return new Shader(vertexCode, fragCode);
+            shader = new Shader(shaderType, vertexCode, fragCode);
+
+            if (!Shaders.TryAdd(name, shader))
+            {
+                Shaders.Add(name, shader);
+            }
+
+            return shader;
         }
 
         public static Image LoadImageJpg(string name)

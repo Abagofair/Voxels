@@ -1,23 +1,19 @@
 ﻿using Game.Debug;
 using Game.Editor;
-using ImGuiNET;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 
 namespace Game
 {
     internal class Game : GameWindow
     {
         private DirectionalLight _directionalLight;
-        private PointLight _pointLight;
-        private SpotLight _spotLight;
-
-        private Thing? _cube1;
-        private Thing? _cube2;
-        private Thing? _cube3;
 
         private Shader? _shader;
         private FreeLookCamera? _camera;
@@ -42,6 +38,9 @@ namespace Game
         private ImGuiController _controller;
         private ImGuiMainWindow _imguiEditor;
 
+        private Renderer _renderer;
+        private Scene _scene;
+
         public Game(
             GameWindowSettings gameWindowSettings, 
             NativeWindowSettings nativeWindowSettings) 
@@ -56,8 +55,6 @@ namespace Game
         {
             base.OnLoad();
 
-            _controller = new ImGuiController(ClientSize.X, ClientSize.Y);
-
             GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
             GL.Enable(EnableCap.DepthTest);
             GL.Enable(EnableCap.StencilTest);
@@ -67,6 +64,24 @@ namespace Game
             GL.Enable(EnableCap.CullFace);
             GL.CullFace(CullFaceMode.Back);
             GL.FrontFace(FrontFaceDirection.Cw);
+
+            _controller = new ImGuiController(ClientSize.X, ClientSize.Y);
+
+            _renderer = new Renderer(ClientSize);
+            _scene = new Scene(this, _renderer, _inputManager);
+
+            _shader = AssetManager.CreateOrGetShader("quad", ShaderType.MaterialShader, true);
+            _basicDiffuse = new Material(_shader, new MaterialProperties()
+            {
+                ambient = new Vector3(1.0f, 0.5f, 0.31f),
+                diffuse = AssetManager.CreateTextureFromPng("container_diffuse", PixelInternalFormat.Srgb),
+                specular = AssetManager.CreateTextureFromPng("container_specular", PixelInternalFormat.Rgb),
+                shininess = 32.0f
+            });
+
+            var block0 = GameEntityManager.Create<GameEntity>("block0", new Transform());
+            GameEntityManager.AddAsDynamicRenderable(block0, new Renderable(1, _basicDiffuse, Model.CreateUnitCube()));
+            _scene.SceneTree.Root.Children.Add(new SceneTree.Node(block0));
 
             var top = AssetManager.LoadImageJpg("top");
             var left = AssetManager.LoadImageJpg("left");
@@ -80,22 +95,13 @@ namespace Game
                 right, left, top, bottom, front, back
             };
 
-            _stencilShader = AssetManager.CreateShader("stencil");
+            _stencilShader = AssetManager.CreateOrGetShader("stencil", ShaderType.ObjectSelect, true);
 
             _cubeMap = new CubeMap(list);
-            _skyBoxShader = AssetManager.CreateShader("skybox");
+            _skyBoxShader = AssetManager.CreateOrGetShader("skybox", ShaderType.Skybox, true);
             _skyBoxCube = Model.CreateUnitCube();
 
-            _shader = AssetManager.CreateShader("quad");
-            _gridShader = AssetManager.CreateShader("grid");
-
-            _basicDiffuse = new Material(_shader, new MaterialProperties()
-            {
-                ambient = new Vector3(1.0f, 0.5f, 0.31f),
-                diffuse = AssetManager.CreateTextureFromPng("container_diffuse", PixelInternalFormat.Srgb),
-                specular = AssetManager.CreateTextureFromPng("container_specular", PixelInternalFormat.Rgb),
-                shininess = 32.0f
-            });
+            _gridShader = AssetManager.CreateOrGetShader("grid", ShaderType.Grid, true);
 
             _gridMaterial = new Material(_gridShader, new MaterialProperties());
 
@@ -105,25 +111,9 @@ namespace Game
 
             _camera = new FreeLookCamera(MathF.PI / 4.0f, (float)ClientSize.X / (float)ClientSize.Y, 0.01f, 1000.0f);
 
-            _cube1 = new Thing(Model.CreateUnitCube(), _basicDiffuse, new Vector3(0.0f, 0.0f, 0.0f));
-            _cube2 = new Thing(Model.CreateUnitCube(), _basicDiffuse, new Vector3(0.0f, 0.0f, 5.0f));
-            _cube3 = new Thing(Model.CreateUnitCube(), _basicDiffuse, new Vector3(0.0f, 0.0f, -5.0f));
-
-            _pointLight = new PointLight()
+            _directionalLight = new DirectionalLight(2, "SunLight", new Transform())
             {
-                position = new Vector3(0.0f, 2.0f, -5.0f),
-                lightProperties = new LightProperties()
-                {
-                    ambient = new Vector3(0.2f, 0.1f, 0.4f),
-                    diffuse = new Vector3(0.5f, 0.5f, 0.5f),
-                    specular = new Vector3(1.0f, 1.0f, 1.0f)
-                }
-            };
-            _pointLight.Upload(_shader);
-
-            _directionalLight = new DirectionalLight()
-            {
-                direction = new Vector3(0.0f, -1.0f, -0.2f),
+                direction = new Vector3(0.0f, -1.0f, 0.0f),
                 lightProperties = new LightProperties()
                 {
                     ambient = new Vector3(0.2f, 0.2f, 0.2f),
@@ -131,26 +121,9 @@ namespace Game
                     specular = new Vector3(1.0f, 1.0f, 1.0f)
                 }
             };
-            _directionalLight.Upload(_shader);
+            _scene.SceneTree.Root.Children.Add(new SceneTree.Node(_directionalLight));
 
-            _spotLight = new SpotLight()
-            {
-                linear = 0.09f,
-                quadratic = 0.032f,
-                cutOff = 0.996f,
-                outerCutOff = 0.965f,
-                lightProperties = new LightProperties()
-                {
-                    ambient = new Vector3(0.0f, 0.0f, 0.0f),
-                    diffuse = new Vector3(1.0f, 1.0f, 1.0f),
-                    specular = new Vector3(1.0f, 1.0f, 1.0f)
-                }
-            };
-
-            _inputManager.AddKeyAction(Keys.W, _camera.MoveForward);
-            _inputManager.AddKeyAction(Keys.A, _camera.MoveLeft);
-            _inputManager.AddKeyAction(Keys.S, _camera.MoveBackward);
-            _inputManager.AddKeyAction(Keys.D, _camera.MoveRight);
+            _scene.Initialize();
 
             //_inputManager.AddMouseAction(MouseAxis.MouseX, _camera.MouseX);
             //_inputManager.AddMouseAction(MouseAxis.MouseY, _camera.MouseY);
@@ -161,6 +134,28 @@ namespace Game
                     CursorState = CursorState.Normal;
                 else
                     CursorState = CursorState.Grabbed;
+            });
+
+            _inputManager.AddKeyAction(Keys.T, (_) =>
+            {
+                //GL.BindFramebuffer(FramebufferTarget.Framebuffer, _frameBuffer);
+                var pixels = new byte[ClientSize.X * ClientSize.Y * 4];
+                GL.ReadPixels(
+                    0,
+                    0,
+                    ClientSize.X,
+                    ClientSize.Y,
+                    PixelFormat.Rgba,
+                    PixelType.UnsignedByte,
+                    pixels);
+
+                using (var image = SixLabors.ImageSharp.Image.LoadPixelData<Rgba32>(pixels, ClientSize.X, ClientSize.Y))
+                {
+                    image.Mutate(x => x.Flip(FlipMode.Vertical));
+                    image.SaveAsPng($"screenshot_{DateTimeOffset.UtcNow.Ticks}.png");
+                }
+                //GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+                //i.SaveAsPng("test");
             });
 
             _time.Start();
@@ -190,22 +185,7 @@ namespace Game
             _inputManager.UpdateMouse(MouseState.Position, MouseState.Delta);
             _inputManager.HandleActions(KeyboardState);
 
-            _spotLight.position = _camera.Position;
-            _spotLight.direction = _camera.Forward;
-            _spotLight.Upload(_shader);
-
-            if (_camera != null && _shader != null)
-            {
-                _shader.SetMatrix4f(6, ref _camera.View);
-                _shader.SetMatrix4f(7, ref _camera.Perspective);
-                _shader.SetVec3(8, ref _camera.Position);
-
-                _gridShader.SetMatrix4f(6, ref _camera.View);
-                _gridShader.SetMatrix4f(7, ref _camera.Perspective);
-
-                _skyBoxShader.SetMatrix4f(6, ref _camera.ViewWithoutTranslation);
-                _skyBoxShader.SetMatrix4f(7, ref _camera.Perspective);
-            }
+            _scene.Update(_time);
         }
 
         protected override void OnRenderFrame(FrameEventArgs args)
@@ -214,61 +194,53 @@ namespace Game
 
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
 
-            _cube2.PrepareForDraw();
-            _cube2.Draw();
-
-            _cube3.PrepareForDraw();
-            _cube3.Draw();
+            _scene.Render();
 
             GL.DepthFunc(DepthFunction.Lequal);
             GL.FrontFace(FrontFaceDirection.Ccw);
             _skyBoxShader.Use();
             _cubeMap.Bind();
-            _skyBoxCube.Draw();
+            _skyBoxCube.Render();
             GL.FrontFace(FrontFaceDirection.Cw);
             GL.DepthFunc(DepthFunction.Less);
 
-            //Write first draw to stencil buffer
-            GL.StencilOp(StencilOp.Keep, StencilOp.Replace, StencilOp.Replace);
-            //write 1's in the stencil buffer for the fragments where cube1 is drawn
-            GL.StencilFunc(StencilFunction.Always, 1, 0xFF);
-            GL.StencilMask(0xFF);
-            _shader.Use();
-            _cube1.Scale(1.0f);
-            _cube1.PrepareForDraw();
-            _cube1.Draw();
+            ////Write first draw to stencil buffer
+            //GL.StencilOp(StencilOp.Keep, StencilOp.Replace, StencilOp.Replace);
+            ////write 1's in the stencil buffer for the fragments where cube1 is drawn
+            //GL.StencilFunc(StencilFunction.Always, 1, 0xFF);
+            //GL.StencilMask(0xFF);
 
-            GL.StencilFunc(StencilFunction.Notequal, 1, 0xFF);
-            GL.StencilMask(0x00);
-            GL.Disable(EnableCap.DepthTest);
+            //_shader.Use();
+            //_cube1.Scale(1.0f);
+            //_cube1.PrepareForDraw();
+            //_cube1.Draw();
 
-            _cube1.Scale(1.06f);
-            _stencilShader.SetMatrix4f(5, ref _cube1.Transform.Matrix);
-            _stencilShader.SetMatrix4f(6, ref _camera.View);
-            _stencilShader.SetMatrix4f(7, ref _camera.Perspective);
-            _stencilShader.Use();
-            _cube1.PrepareForDraw();
-            _cube1.DrawWithoutMaterial();
+            //GL.StencilFunc(StencilFunction.Notequal, 1, 0xFF);
+            //GL.StencilMask(0x00);
+            //GL.Disable(EnableCap.DepthTest);
 
-            //POST
-            GL.StencilMask(0xFF);
-            GL.StencilFunc(StencilFunction.Always, 0, 0xFF);
-            GL.Enable(EnableCap.DepthTest);
+            //_cube1.Scale(1.06f);
+            //_stencilShader.SetMatrix4f(5, ref _cube1.Transform.Matrix);
+            //_stencilShader.SetMatrix4f(6, ref _camera.View);
+            //_stencilShader.SetMatrix4f(7, ref _camera.Perspective);
+            //_stencilShader.Use();
+            //_cube1.PrepareForDraw();
+            //_cube1.DrawWithoutMaterial();
+
+            ////POST
+            //GL.StencilMask(0xFF);
+            //GL.StencilFunc(StencilFunction.Always, 0, 0xFF);
+            //GL.Enable(EnableCap.DepthTest);
 
             _gridThing.PrepareForDraw();
             _gridShader.Use();
             _gridThing.Draw();
 
-            /*_controller.Update(this, (float)args.Time);
-            ImGui.ShowDemoWindow();
-            _controller.Render();
-            ImGuiController.CheckGLError("End of frame");*/
-
             _controller.Update(this, (float)args.Time);
             _imguiEditor.Show();
             _controller.Render();
             ImGuiController.CheckGLError("End of frame");
-
+            
             SwapBuffers();
         }
     }

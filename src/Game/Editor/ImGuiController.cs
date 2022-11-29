@@ -490,8 +490,8 @@ void main()
             int program = GL.CreateProgram();
             LabelObject(ObjectLabelIdentifier.Program, program, $"Program: {name}");
 
-            int vertex = CompileShader(name, ShaderType.VertexShader, vertexSource);
-            int fragment = CompileShader(name, ShaderType.FragmentShader, fragmentSoruce);
+            int vertex = CompileShader(name, OpenTK.Graphics.OpenGL4.ShaderType.VertexShader, vertexSource);
+            int fragment = CompileShader(name, OpenTK.Graphics.OpenGL4.ShaderType.FragmentShader, fragmentSoruce);
 
             GL.AttachShader(program, vertex);
             GL.AttachShader(program, fragment);
@@ -514,7 +514,7 @@ void main()
             return program;
         }
 
-        private static int CompileShader(string name, ShaderType type, string source)
+        private static int CompileShader(string name, OpenTK.Graphics.OpenGL4.ShaderType type, string source)
         {
             int shader = GL.CreateShader(type);
             LabelObject(ObjectLabelIdentifier.Shader, shader, $"Shader: {name}");

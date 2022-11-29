@@ -2,10 +2,23 @@
 
 namespace Game
 {
-    internal class DirectionalLight
+    internal class DirectionalLight : GameEntity
     {
         public Vector3 direction = new Vector3(0.0f, -1.0f, 0.0f);
-        public LightProperties lightProperties = new LightProperties();
+        public LightProperties lightProperties = new LightProperties()
+        {
+            ambient = Vector3.One,
+            specular = Vector3.One,
+            diffuse = Vector3.One
+        };
+
+        public DirectionalLight(
+            int id, 
+            string name, 
+            Transform transform) 
+            : base(id, name, transform)
+        {
+        }
 
         public void Upload(Shader shader)
         {

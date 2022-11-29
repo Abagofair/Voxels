@@ -5,21 +5,19 @@
         private const int MaximumAmount = 1000;
         private static readonly List<LogMessage> _logMessages = new List<LogMessage>(MaximumAmount);
 
-        public static void Debug(string message)
+        public static void Info(string message) => AddMessage(message, LogLevel.Info);
+        public static void Debug(string message) => AddMessage(message, LogLevel.Debug);
+
+        private static void AddMessage(string message, LogLevel logLevel)
         {
             var logMessage = new LogMessage(
                     DateTimeOffset.UtcNow.TimeOfDay,
                     message,
-                    LogLevel.Debug);
+                    LogLevel.Info);
 
             _logMessages.Add(logMessage);
 
             Console.WriteLine(logMessage);
-        }
-
-        public static void AddMessage(LogMessage message)
-        {
-            _logMessages.Add(message);
 
             if (_logMessages.Count > MaximumAmount)
             {

@@ -41,7 +41,7 @@ namespace Game
 
         public int Width => _width;
         public int Height => _height;
-
+        public int Handle => _handle;
         public void Bind()
         {
             GL.BindTexture(TextureTarget.Texture2D, _handle);

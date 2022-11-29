@@ -149,8 +149,8 @@ void main()
     vec3 viewDirection = normalize(CameraPosition - outFragPos);
 
     vec3 result = calculateDirectionalLight(directionalLight, norm, viewDirection);
-    result += calculatePointLight(pointLight, norm, outFragPos, viewDirection);
-    result += calculateSpotLight(spotLight, norm, outFragPos, viewDirection);
+    //result += calculatePointLight(pointLight, norm, outFragPos, viewDirection);
+    //result += calculateSpotLight(spotLight, norm, outFragPos, viewDirection);
 
     FragColor = vec4(result, 1.0);
     float gamma = 2.2;

@@ -1,5 +1,4 @@
-﻿using OpenTK.Audio.OpenAL.Extensions.EXT.FloatFormat;
-using OpenTK.Graphics.OpenGL4;
+﻿using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 
 namespace Game
@@ -7,20 +6,28 @@ namespace Game
     internal class Shader : IDisposable
     {
         private readonly int _handle;
+        private readonly ShaderType _shaderType;
 
-        public Shader(string vertSource, string fragSource)
+        public Shader(
+            ShaderType shaderType,
+            string vertSource, 
+            string fragSource)
         {
             if (vertSource == null) throw new ArgumentNullException(nameof(vertSource));
             if (fragSource == null) throw new ArgumentNullException(nameof(fragSource));
 
-            var vertexShader = Compile(vertSource, ShaderType.VertexShader);
-            var fragmentShader = Compile(fragSource, ShaderType.FragmentShader);
+            var vertexShader = Compile(vertSource, OpenTK.Graphics.OpenGL4.ShaderType.VertexShader);
+            var fragmentShader = Compile(fragSource, OpenTK.Graphics.OpenGL4.ShaderType.FragmentShader);
 
             _handle = Link(vertexShader, fragmentShader);
 
             GL.DeleteShader(vertexShader);
             GL.DeleteShader(fragmentShader);
+
+            _shaderType = shaderType;
         }
+
+        public ShaderType Type => _shaderType;
 
         public void Use()
         {
@@ -58,8 +65,13 @@ namespace Game
         }
 
         public void SetMatrix4f(int location, ref Matrix4 value) => GL.ProgramUniformMatrix4(_handle, location, false, ref value);
+        public void SetMatrix4f(string name, ref Matrix4 value)
+        {
+            int loc = GL.GetUniformLocation(_handle, name);
+            GL.ProgramUniformMatrix4(_handle, loc, false, ref value);
+        }
 
-        public static int Compile(string source, ShaderType shaderType)
+        public static int Compile(string source, OpenTK.Graphics.OpenGL4.ShaderType shaderType)
         {
             var shader = GL.CreateShader(shaderType);
             GL.ShaderSource(shader, source);

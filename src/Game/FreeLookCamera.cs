@@ -23,8 +23,8 @@ namespace Game
         private Matrix4 _view;
         private Matrix4 _viewWithoutTranslation;
 
-        public event Action<Matrix4>? ViewChanged;
-        public event Action<Matrix4>? PerspectiveChanged;
+        public event Action? ViewChanged;
+        public event Action? PerspectiveChanged;
 
         public FreeLookCamera(
             float fov,
@@ -45,7 +45,7 @@ namespace Game
 
         public ref Vector3 Forward => ref _forward;
         public ref Vector3 Position => ref _worldPosition;
-        public ref Matrix4 Perspective => ref _perspective;
+        public ref Matrix4 Projection => ref _perspective;
         public ref Matrix4 View => ref _view;
         public ref Matrix4 ViewWithoutTranslation => ref _viewWithoutTranslation;
 
@@ -114,7 +114,7 @@ namespace Game
         {
             _perspective = MathHelpers.CreatePerspectiveFieldOfViewLH(_fov, _aspectRatio, _near, _far);
 
-            PerspectiveChanged?.Invoke(_perspective);
+            PerspectiveChanged?.Invoke();
         }
 
         private void UpdateView()
@@ -143,7 +143,7 @@ namespace Game
 
             _viewWithoutTranslation = view;
 
-            ViewChanged?.Invoke(_view);
+            ViewChanged?.Invoke();
         }
     }
 }

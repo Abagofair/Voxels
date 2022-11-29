@@ -150,6 +150,8 @@ namespace Game.Editor
                         350.0f,
                         viewportSize.Y));
 
+                //ImGui.Image(_game._renderTargetColorTexture, viewportSize);
+                
                 ImGui.End();
             }
         }
