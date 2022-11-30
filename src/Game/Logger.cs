@@ -13,7 +13,7 @@
             var logMessage = new LogMessage(
                     DateTimeOffset.UtcNow.TimeOfDay,
                     message,
-                    LogLevel.Info);
+                    logLevel);
 
             _logMessages.Add(logMessage);
 

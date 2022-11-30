@@ -41,6 +41,10 @@ namespace Game
         private Renderer _renderer;
         private Scene _scene;
 
+        private Shader _renderTargetShader;
+        private Texture2D _renderTargetTexture;
+        private Model _renderTargetQuad;
+
         public Game(
             GameWindowSettings gameWindowSettings, 
             NativeWindowSettings nativeWindowSettings) 
@@ -50,6 +54,8 @@ namespace Game
             _inputManager = new InputManager(_time);
             _imguiEditor = new ImGuiMainWindow(this, _time);
         }
+
+        public Scene ActiveScene => _scene;
 
         protected override void OnLoad()
         {
@@ -67,11 +73,18 @@ namespace Game
 
             _controller = new ImGuiController(ClientSize.X, ClientSize.Y);
 
+            _cubeMap = AssetManager.CreateCubeMap("SkyCubeMap");
+            _skyBoxShader = AssetManager.CreateOrGetShader("skybox", ShaderType.Skybox, true);
+            var skyboxMaterial = new SkyboxMaterial(_skyBoxShader, _cubeMap);
+
             _renderer = new Renderer(ClientSize);
-            _scene = new Scene(this, _renderer, _inputManager);
+            _scene = new Scene(this, _renderer, _inputManager, new Skybox(99, skyboxMaterial));
+
+            _renderTargetShader = AssetManager.CreateOrGetShader("renderTargetPresent", ShaderType.RenderTargetPresent, true);
+            _renderTargetQuad = Model.CreateQuadNDC();
 
             _shader = AssetManager.CreateOrGetShader("quad", ShaderType.MaterialShader, true);
-            _basicDiffuse = new Material(_shader, new MaterialProperties()
+            _basicDiffuse = new BasicMaterial(_shader, new MaterialProperties()
             {
                 ambient = new Vector3(1.0f, 0.5f, 0.31f),
                 diffuse = AssetManager.CreateTextureFromPng("container_diffuse", PixelInternalFormat.Srgb),
@@ -81,33 +94,25 @@ namespace Game
 
             var block0 = GameEntityManager.Create<GameEntity>("block0", new Transform());
             GameEntityManager.AddAsDynamicRenderable(block0, new Renderable(1, _basicDiffuse, Model.CreateUnitCube()));
-            _scene.SceneTree.Root.Children.Add(new SceneTree.Node(block0));
+            var block0Node = new SceneTree.Node(block0);
+            _scene.SceneTree.Root.Children.Add(block0Node);
 
-            var top = AssetManager.LoadImageJpg("top");
-            var left = AssetManager.LoadImageJpg("left");
-            var front = AssetManager.LoadImageJpg("front");
-            var right = AssetManager.LoadImageJpg("right");
-            var back = AssetManager.LoadImageJpg("back");
-            var bottom = AssetManager.LoadImageJpg("bottom");
+            var block1 = GameEntityManager.Create<GameEntity>("block1", new Transform());
+            GameEntityManager.AddAsDynamicRenderable(block1, new Renderable(2, _basicDiffuse, Model.CreateUnitCube()));
+            block0Node.Children.Add(new SceneTree.Node(block1));
 
-            var list = new List<Image>()
+            _gridShader = AssetManager.CreateOrGetShader("grid", ShaderType.Grid, true);
+            _gridMaterial = new GridMaterial(_gridShader);
+            var grid = GameEntityManager.Create<GameEntity>("editorGrid", new Transform());
+            GameEntityManager.AddAsDynamicRenderable(grid, new Renderable(5, _gridMaterial, Model.CreateQuadNDC())
             {
-                right, left, top, bottom, front, back
-            };
+                RenderOrder = 99
+            });
+            _scene.SceneTree.Root.Children.Add(new SceneTree.Node(grid));
 
             _stencilShader = AssetManager.CreateOrGetShader("stencil", ShaderType.ObjectSelect, true);
 
-            _cubeMap = new CubeMap(list);
-            _skyBoxShader = AssetManager.CreateOrGetShader("skybox", ShaderType.Skybox, true);
-            _skyBoxCube = Model.CreateUnitCube();
-
-            _gridShader = AssetManager.CreateOrGetShader("grid", ShaderType.Grid, true);
-
-            _gridMaterial = new Material(_gridShader, new MaterialProperties());
-
             //TAG LIGE NOGLE FUCKING NOTER SÅ DU IKKE GLEMMER ALT DET HER FRA MODEL TO PROJECTION DEPTH BUFFER LORT
-
-            _gridThing = new Thing(_gridMaterial, Vector3.Zero);
 
             _camera = new FreeLookCamera(MathF.PI / 4.0f, (float)ClientSize.X / (float)ClientSize.Y, 0.01f, 1000.0f);
 
@@ -185,24 +190,16 @@ namespace Game
             _inputManager.UpdateMouse(MouseState.Position, MouseState.Delta);
             _inputManager.HandleActions(KeyboardState);
 
+            //_controller.Update(this, _time.DeltaTimeF);
+
             _scene.Update(_time);
         }
-
+        
         protected override void OnRenderFrame(FrameEventArgs args)
         {
             base.OnRenderFrame(args);
 
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
-
             _scene.Render();
-
-            GL.DepthFunc(DepthFunction.Lequal);
-            GL.FrontFace(FrontFaceDirection.Ccw);
-            _skyBoxShader.Use();
-            _cubeMap.Bind();
-            _skyBoxCube.Render();
-            GL.FrontFace(FrontFaceDirection.Cw);
-            GL.DepthFunc(DepthFunction.Less);
 
             ////Write first draw to stencil buffer
             //GL.StencilOp(StencilOp.Keep, StencilOp.Replace, StencilOp.Replace);
@@ -232,16 +229,39 @@ namespace Game
             //GL.StencilFunc(StencilFunction.Always, 0, 0xFF);
             //GL.Enable(EnableCap.DepthTest);
 
-            _gridThing.PrepareForDraw();
+            /*_gridThing.PrepareForDraw();
             _gridShader.Use();
-            _gridThing.Draw();
+            _gridThing.Draw();*/
 
-            _controller.Update(this, (float)args.Time);
+            //GL.Viewport(0, 0, ClientSize.X, ClientSize.Y);
+            GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
+            _controller.Update(this, _time.DeltaTimeF);
             _imguiEditor.Show();
             _controller.Render();
             ImGuiController.CheckGLError("End of frame");
-            
+
             SwapBuffers();
+        }
+
+        private void PresentRenderTarget(RenderTarget renderTarget)
+        {
+            //GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+
+            //GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
+
+            ////var renderTargetTexture = renderTarget.ColorTextureId;
+
+            ////_renderTargetShader.Use();
+            ////GL.ActiveTexture(TextureUnit.Texture0);
+            ////GL.BindTexture(TextureTarget.Texture2D, renderTargetTexture);
+            ////_renderTargetQuad.Draw();
+
+            //_imguiEditor.Show();
+            //_controller.Render();
+            //ImGuiController.CheckGLError("End of frame");
+
+            //SwapBuffers();
         }
     }
 }

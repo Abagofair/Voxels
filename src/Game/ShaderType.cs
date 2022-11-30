@@ -5,6 +5,7 @@
         MaterialShader,
         ObjectSelect,
         Skybox,
-        Grid
+        Grid,
+        RenderTargetPresent
     }
 }

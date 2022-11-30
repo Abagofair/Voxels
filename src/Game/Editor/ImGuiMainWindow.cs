@@ -1,4 +1,7 @@
 ﻿using ImGuiNET;
+using OpenTK.Graphics.OpenGL4;
+using OpenTK.Mathematics;
+using static Game.SceneTree;
 
 namespace Game.Editor
 {
@@ -11,6 +14,9 @@ namespace Game.Editor
         private bool _rightDockWindow = true;
         private bool _leftDockWindow = true;
         private bool _logWindow = true;
+        private bool _gameWindow = true;
+        private bool _sceneTree = true;
+        private bool _createEntity = false;
 
         public ImGuiMainWindow(
             Game game,
@@ -27,6 +33,8 @@ namespace Game.Editor
             DrawLeftDock();
             DrawRightDock();
             DrawLogWindow();
+            DrawGameWindow();
+            DrawSceneTree();
         }
 
         public void DrawTopMenu()
@@ -53,6 +61,16 @@ namespace Game.Editor
 
                     if (ImGui.BeginMenu("Windows"))
                     {
+                        if (ImGui.MenuItem("Scene tree"))
+                        {
+                            _sceneTree = !_sceneTree;
+                        }
+
+                        if (ImGui.MenuItem("Game window"))
+                        {
+                            _gameWindow = !_gameWindow;
+                        }
+
                         if (ImGui.MenuItem("Log"))
                         {
                             _logWindow = !_logWindow;
@@ -177,6 +195,108 @@ namespace Game.Editor
                 }
 
                 ImGui.End();
+            }
+        }
+
+        public void DrawGameWindow()
+        {
+           // ImGui.SetNextWindowPos(ImGui.GetWindowPos());
+           // ImGui.SetNextWindowSize(new System.Numerics.Vector2(800.0f, 600.0f));
+            if (_gameWindow && 
+                ImGui.Begin("Game"))
+            {
+                ImGui.BeginChild("Render");
+                _game.ActiveScene.Renderer.RenderTarget.ViewportSize
+                    = new Vector2i((int)ImGui.GetWindowSize().X, (int)ImGui.GetWindowSize().Y);
+
+                float newAspectRatio = (float)_game.ActiveScene.Renderer.RenderTarget.ViewportSize.X / _game.ActiveScene.Renderer.RenderTarget.ViewportSize.Y;
+
+                _game.ActiveScene.Camera.AspectRatio = newAspectRatio;
+
+                ImGui.Image(_game.ActiveScene.Renderer.RenderTarget.ColorTextureId, 
+                    new System.Numerics.Vector2(
+                        _game.ActiveScene.Renderer.RenderTarget.ViewportSize.X,
+                    _game.ActiveScene.Renderer.RenderTarget.ViewportSize.Y),
+                    new System.Numerics.Vector2(0.0f, 1.0f),
+                    new System.Numerics.Vector2(1.0f, 0.0f));
+
+                ImGui.EndChild();
+                ImGui.End();
+            }
+        }
+
+        public void DrawSceneTree()
+        {
+            ImGui.ShowDemoWindow();
+            if (_sceneTree &&
+                ImGui.Begin("Scene tree", ref _sceneTree))
+            {
+                var rootNode = _game.ActiveScene.SceneTree.Root;
+
+                if (ImGui.TreeNodeEx(rootNode.GameEntity.Name,
+                            ImGuiTreeNodeFlags.OpenOnDoubleClick |
+                            ImGuiTreeNodeFlags.OpenOnArrow |
+                            ImGuiTreeNodeFlags.SpanFullWidth))
+                {
+                    SetupCreateEntityMenu(rootNode);
+
+                    if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
+                    {
+                        ImGui.OpenPopup("CreateEntityMenu");
+                    }
+
+                    Iterate(rootNode);
+                }
+
+                ImGui.End();
+            }
+
+            void Iterate(SceneTree.Node parent)
+            { 
+                foreach (var node in parent.Children)
+                {
+                    if (ImGui.TreeNodeEx(node.GameEntity.Name,
+                        ImGuiTreeNodeFlags.OpenOnDoubleClick |
+                        ImGuiTreeNodeFlags.OpenOnArrow |
+                        ImGuiTreeNodeFlags.SpanFullWidth))
+                    {
+                        SetupCreateEntityMenu(node);
+
+                        if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
+                        {
+                            ImGui.OpenPopup("CreateEntityMenu");
+                        }
+
+                        Iterate(node);
+                        ImGui.TreePop();
+                    }
+                }
+            }
+        }
+
+        public void SetupCreateEntityMenu(SceneTree.Node node)
+        {
+            //$"Add entity to parent {parent.GameEntity.Name}"
+            if (ImGui.BeginPopup("CreateEntityMenu"))
+            {
+                if (ImGui.Selectable("Add block"))
+                {
+                    var shader = AssetManager.CreateOrGetShader("quad", ShaderType.MaterialShader, false);
+                    var dif = new BasicMaterial(shader, new MaterialProperties()
+                    {
+                        ambient = new Vector3(1.0f, 0.5f, 0.31f),
+                        diffuse = AssetManager.CreateTextureFromPng("container_diffuse", PixelInternalFormat.Srgb),
+                        specular = AssetManager.CreateTextureFromPng("container_specular", PixelInternalFormat.Rgb),
+                        shininess = 32.0f
+                    });
+
+                    var block0 = GameEntityManager.Create<GameEntity>($"block_{Guid.NewGuid()}", new Transform());
+                    GameEntityManager.AddAsDynamicRenderable(block0, new Renderable(1, dif, Model.CreateUnitCube()));
+                    var block0Node = new SceneTree.Node(block0);
+                    node.Children.Add(block0Node);
+                }
+
+                ImGui.EndPopup();
             }
         }
     }

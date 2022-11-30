@@ -1,4 +1,6 @@
-﻿namespace Game
+﻿using System.Collections;
+
+namespace Game
 {
     internal class SceneTree
     {

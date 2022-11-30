@@ -52,9 +52,11 @@ namespace Game
                 viewportSize.Y);
 
             //attach depthstencil to framebuffer
-            GL.FramebufferRenderbuffer(FramebufferTarget.Framebuffer,
+            GL.FramebufferRenderbuffer(
+                FramebufferTarget.Framebuffer,
                 FramebufferAttachment.DepthStencilAttachment,
-                RenderbufferTarget.Renderbuffer, _depthStencilRboId);
+                RenderbufferTarget.Renderbuffer, 
+                _depthStencilRboId);
 
             var code = GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
             if (code != FramebufferErrorCode.FramebufferComplete)
@@ -69,8 +71,8 @@ namespace Game
 
         public void Bind()
         {
-            GL.Viewport(0, 0, ViewportSize.X, ViewportSize.Y);
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, _frameBufferId);
+            //GL.Viewport(0, 0, ViewportSize.X, ViewportSize.Y);
         }
 
         public void Dispose()

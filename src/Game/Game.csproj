@@ -27,6 +27,12 @@
     <None Update="Assets\Shaders\quad.vert">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Assets\Shaders\renderTargetPresent.frag">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Assets\Shaders\renderTargetPresent.vert">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Assets\Shaders\skybox.frag">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -39,10 +45,10 @@
     <None Update="Assets\Shaders\stencil.vert">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\Textures\back.jpg">
+    <None Update="Assets\Textures\SkyCubeMap\back.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\Textures\bottom.jpg">
+    <None Update="Assets\Textures\SkyCubeMap\bottom.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Assets\Textures\container.jpg">
@@ -54,19 +60,19 @@
     <None Update="Assets\Textures\container_specular.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\Textures\front.jpg">
+    <None Update="Assets\Textures\SkyCubeMap\front.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\Textures\left.jpg">
+    <None Update="Assets\Textures\SkyCubeMap\left.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\Textures\right.jpg">
+    <None Update="Assets\Textures\SkyCubeMap\right.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Assets\Textures\Test.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\Textures\top.jpg">
+    <None Update="Assets\Textures\SkyCubeMap\top.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

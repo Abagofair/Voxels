@@ -4,7 +4,7 @@ namespace Game
 {
     internal class Texture2D : IDisposable
     {
-        private readonly int _handle;
+        private int _handle;
 
         private readonly int _width;
         private readonly int _height;
@@ -13,20 +13,26 @@ namespace Game
             PixelInternalFormat internalFormat,
             int width, 
             int height, 
-            byte[] bytes)
+            byte[] bytes,
+            bool generateMipMaps)
         {
             if (bytes == null) throw new ArgumentNullException(nameof(bytes));
 
             _width = width;
             _height = height;
 
+            CreateTexture(bytes, internalFormat, generateMipMaps);
+        }
+
+        private void CreateTexture(byte[] bytes, PixelInternalFormat internalFormat, bool generateMipMaps)
+        {
             _handle = GL.GenTexture();
             GL.BindTexture(TextureTarget.Texture2D, _handle);
             GL.TexImage2D(TextureTarget.Texture2D,
                 0,
                 internalFormat,
-                width,
-                height,
+                _width,
+                _height,
                 0,
                 PixelFormat.Rgba,
                 PixelType.UnsignedByte,
@@ -34,9 +40,13 @@ namespace Game
 
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMinFilter.Linear);
-            GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+
+            if (generateMipMaps)
+            {
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMinFilter.Linear);
+                GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+            }
         }
 
         public int Width => _width;

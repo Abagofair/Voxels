@@ -1,5 +1,4 @@
-﻿using OpenTK.Mathematics;
-using OpenTK.Windowing.GraphicsLibraryFramework;
+﻿using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace Game
 {
@@ -9,15 +8,18 @@ namespace Game
         private readonly Renderer _renderer;
         private readonly InputManager _inputManager;
         private readonly FreeLookCamera _freeLookCamera;
+        private readonly Skybox _skybox;
 
         public Scene(
             Game game,
             Renderer renderer,
-            InputManager inputManager)
+            InputManager inputManager,
+            Skybox skybox)
         {
             _game = game ?? throw new ArgumentNullException(nameof(game));
             _renderer = renderer ?? throw new ArgumentNullException(nameof(renderer));
-            _inputManager = inputManager ?? throw new ArgumentNullException(nameof(InputManager));
+            _inputManager = inputManager ?? throw new ArgumentNullException(nameof(inputManager));
+            _skybox = skybox ?? throw new ArgumentNullException(nameof(skybox));
 
             _freeLookCamera = new FreeLookCamera(
                 MathF.PI / 4.0f, 
@@ -36,11 +38,10 @@ namespace Game
             //contains world transform
             var rootGameObject = GameEntityManager.Create<GameEntity>("sceneRoot", new Transform());
             SceneTree = new SceneTree(rootGameObject);
-
-            //var block0 = GameEntityManager.Create<GameEntity>("block0", new Transform());
-            //SceneTree.Root.Children.Add(new SceneTree.Node(block0));
         }
 
+        public FreeLookCamera Camera => _freeLookCamera;
+        public Renderer Renderer => _renderer;
         public SceneTree SceneTree { get; }
 
         private void UpdateCameraView()
@@ -97,7 +98,8 @@ namespace Game
              *      render
              */
 
-            IEnumerable<Renderable> stuffToRender = GameEntityManager.GetRenderables(SceneTree);
+            IEnumerable<Renderable> stuffToRender = GameEntityManager.GetRenderables(SceneTree)
+                .Append(_skybox);
 
             _renderer.Render(stuffToRender);
         }

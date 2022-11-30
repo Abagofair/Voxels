@@ -1,4 +1,6 @@
-﻿namespace Game
+﻿using OpenTK.Graphics.OpenGL4;
+
+namespace Game
 {
     internal class Renderable
     {
@@ -20,10 +22,18 @@
         public int RenderOrder { get; set; }
         public bool ShouldRender { get; set; } = true;
 
+        protected virtual void SetupState()
+        { }
+
+        protected virtual void RemoveState()
+        { }
+
         public void Render()
         {
             if (!ShouldRender)
                 return;
+
+            SetupState();
 
             if (Transform != null)
             {
@@ -31,7 +41,9 @@
             }
 
             _material.Apply();
-            _model.Render();
+            _model.Draw();
+
+            RemoveState();
         }
 
         public override int GetHashCode() => _id;

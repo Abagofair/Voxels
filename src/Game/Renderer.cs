@@ -13,11 +13,11 @@ namespace Game
             _defaultRenderTarget = new RenderTarget(viewportSize);
         }
 
-        public event Action<RenderTarget>? OnFinishedFrame;
+        public RenderTarget RenderTarget => _defaultRenderTarget;
 
         public void Render(IEnumerable<Renderable> renderables)
         {
-            //_defaultRenderTarget.Bind();
+            _defaultRenderTarget.Bind();
 
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
 
@@ -27,17 +27,10 @@ namespace Game
              *          
              */
 
-            /*GL.FrontFace(FrontFaceDirection.Cw);
-            GL.DepthFunc(DepthFunction.Less);*/
-
             foreach (var renderable in renderables.OrderBy(x => x.RenderOrder))
             {
                 renderable.Render();
             }
-
-            //Render scene
-            //Done with rendering
-            OnFinishedFrame?.Invoke(_defaultRenderTarget);
         }
     }
 }
