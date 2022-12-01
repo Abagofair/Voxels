@@ -4,7 +4,7 @@ namespace Game.Editor.Windows
 {
     internal class EditGameEntityWindow : Window
     {
-        private System.Numerics.Vector3 _position;
+        private System.Numerics.Vector3 _rotation;
 
         public override string Name => nameof(EditGameEntityWindow);
 
@@ -33,11 +33,28 @@ namespace Game.Editor.Windows
                     ImGui.Text($"You are editing {selectedNodeEntity.Name}");
                     ImGui.Separator();
                 }
-                
+
+                ImGui.InputText("Name", ref selectedNodeEntity.Name, 125, ImGuiInputTextFlags.EnterReturnsTrue);
+                ImGui.Separator();
+
                 fixed (float* value = &selectedNodeEntity.Transform.Position.X)
                 {
-                    ImGui.InputScalarN("Position", ImGuiDataType.Float, (IntPtr)value, 3);
+                    ImGui.DragScalarN("Position", ImGuiDataType.Float, (IntPtr)value, 3);
                 }
+
+                fixed (float* value = &selectedNodeEntity.Transform.Scale.X)
+                {
+                    ImGui.DragScalarN("Scale", ImGuiDataType.Float, (IntPtr)value, 3);
+                }
+
+                fixed (float* value = &selectedNodeEntity.Transform.Scale.X)
+                {
+                    ImGui.DragFloat3("Rotation in degrees", ref _rotation);
+                    selectedNodeEntity.Transform.Pitch = _rotation.X * (MathF.PI / 180.0f);
+                    selectedNodeEntity.Transform.Yaw = _rotation.Y * (MathF.PI / 180.0f);
+                    selectedNodeEntity.Transform.Roll = _rotation.Z * (MathF.PI / 180.0f);
+                }
+                ImGui.Separator();
 
                 ImGui.End();
             }
