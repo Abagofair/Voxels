@@ -111,7 +111,7 @@ namespace Game
             _scene.SceneTree.Root.Children.Add(new SceneTree.Node(grid));
 
             _stencilShader = AssetManager.CreateOrGetShader("stencil", ShaderType.ObjectSelect, true);
-
+            
             //TAG LIGE NOGLE FUCKING NOTER SÅ DU IKKE GLEMMER ALT DET HER FRA MODEL TO PROJECTION DEPTH BUFFER LORT
 
             _camera = new FreeLookCamera(MathF.PI / 4.0f, (float)ClientSize.X / (float)ClientSize.Y, 0.01f, 1000.0f);
@@ -166,6 +166,20 @@ namespace Game
             _time.Start();
 
             CursorState = CursorState.Normal;
+        }
+
+        protected override void OnTextInput(TextInputEventArgs e)
+        {
+            base.OnTextInput(e);
+
+            _controller.PressChar((char)e.Unicode);
+        }
+
+        protected override void OnMouseWheel(MouseWheelEventArgs e)
+        {
+            base.OnMouseWheel(e);
+
+            _controller.MouseScroll(e.Offset);
         }
 
         protected override void OnResize(ResizeEventArgs e)

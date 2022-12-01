@@ -10,7 +10,7 @@ var nativeWindowSettings = new NativeWindowSettings()
 {
     Size = new OpenTK.Mathematics.Vector2i(1920, 1080),
     Title = "Test",
-    APIVersion = new Version(4, 5),
+    APIVersion = new Version(4, 5)
 };
 
 using var game = new Game.Game(gameWindowSettings, nativeWindowSettings);

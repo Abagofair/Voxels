@@ -44,8 +44,8 @@ namespace Game
 
             public void Update(Node parent, Time time)
             {
-                GameEntity.Update(time);
                 GameEntity.Transform.Parent = parent.GameEntity.Transform.Matrix;
+                GameEntity.Update(time);
 
                 foreach (Node child in Children)
                 {

@@ -298,6 +298,17 @@ void main()
             io.KeyMap[(int)ImGuiKey.X] = (int)Keys.X;
             io.KeyMap[(int)ImGuiKey.Y] = (int)Keys.Y;
             io.KeyMap[(int)ImGuiKey.Z] = (int)Keys.Z;
+
+            io.KeyMap[(int)ImGuiKey._0] = (int)Keys.D0;
+            io.KeyMap[(int)ImGuiKey._1] = (int)Keys.D1;
+            io.KeyMap[(int)ImGuiKey._2] = (int)Keys.D2;
+            io.KeyMap[(int)ImGuiKey._3] = (int)Keys.D3;
+            io.KeyMap[(int)ImGuiKey._4] = (int)Keys.D4;
+            io.KeyMap[(int)ImGuiKey._5] = (int)Keys.D5;
+            io.KeyMap[(int)ImGuiKey._6] = (int)Keys.D6;
+            io.KeyMap[(int)ImGuiKey._7] = (int)Keys.D7;
+            io.KeyMap[(int)ImGuiKey._8] = (int)Keys.D8;
+            io.KeyMap[(int)ImGuiKey._9] = (int)Keys.D9;
         }
 
         private void RenderImDrawData(ImDrawDataPtr draw_data)
