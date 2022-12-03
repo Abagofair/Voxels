@@ -6,6 +6,17 @@ namespace Game.Editor.Windows
     {
         public override string Name => nameof(LogWindow);
 
+        public override void Resize(EditorState editorState)
+        {
+            ImGui.SetNextWindowPos(new System.Numerics.Vector2(
+                editorState.ImGuiWindowWidth, 
+                editorState.Game.ClientSize.Y - 200.0f));
+
+            ImGui.SetNextWindowSize(new System.Numerics.Vector2(
+                editorState.Game.ClientSize.X - (editorState.ImGuiWindowWidth * 2), 
+                editorState.Game.ClientSize.Y - (editorState.Game.ClientSize.Y - 200.0f)));
+        }
+
         public override void Draw(EditorState editorState)
         {
             if (IsOpen &&
@@ -15,16 +26,6 @@ namespace Game.Editor.Windows
                 {
                     editorState.ActiveWindow = this;
                 }
-
-                var viewportSize = ImGui.GetMainViewport().WorkSize;
-
-                ImGui.SetWindowSize(
-                    new System.Numerics.Vector2(300.0f, 200.0f));
-
-                ImGui.SetWindowPos(
-                    new System.Numerics.Vector2(
-                        350.0f,
-                        viewportSize.Y + ImGui.GetItemRectSize().Y - 200.0f));
 
                 foreach (var logMessage in Logger.GetLogMessages())
                 {

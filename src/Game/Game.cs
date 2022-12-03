@@ -166,6 +166,8 @@ namespace Game
             _time.Start();
 
             CursorState = CursorState.Normal;
+
+            _imguiEditor.Initialize();
         }
 
         protected override void OnTextInput(TextInputEventArgs e)

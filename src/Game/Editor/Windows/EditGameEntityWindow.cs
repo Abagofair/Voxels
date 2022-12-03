@@ -8,9 +8,19 @@ namespace Game.Editor.Windows
 
         public override string Name => nameof(EditGameEntityWindow);
 
+        public override void Resize(EditorState editorState)
+        {
+            ImGui.SetNextWindowPos(new System.Numerics.Vector2(
+                editorState.Game.ClientSize.X - editorState.ImGuiWindowWidth, 
+                editorState.ImGuiMainMenubarHeight));
+
+            ImGui.SetNextWindowSize(new System.Numerics.Vector2(
+                editorState.ImGuiWindowWidth,
+                editorState.Game.ClientSize.Y - editorState.ImGuiMainMenubarHeight));
+        }
+
         public unsafe override void Draw(EditorState editorState)
         {
-            ImGui.ShowDemoWindow();
             if (IsOpen &&
                 ImGui.Begin(Name, ref IsOpen))
             {

@@ -14,6 +14,11 @@ namespace Game.Editor
             _editorState = new EditorState(game, time);
         }
 
+        public void Initialize()
+        {
+            _editorState.Initialize();
+        }
+
         public void Show()
         {
             DrawMainMenuBar();

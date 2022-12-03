@@ -7,7 +7,14 @@
         private bool _isOpen = false;
         public ref bool IsOpen => ref _isOpen;
 
+        public bool AlwaysResize { get; set; } = true;
+
         public abstract void Draw(EditorState editorState);
+
+        public virtual void Resize(EditorState editorState)
+        {
+
+        }
 
         public void OpenWindow()
         {

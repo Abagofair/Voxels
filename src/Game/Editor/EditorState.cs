@@ -1,4 +1,5 @@
 ﻿using Game.Editor.Windows;
+using ImGuiNET;
 
 namespace Game.Editor
 {
@@ -15,6 +16,8 @@ namespace Game.Editor
         public event Action<Window?>? OnWindowChanged;
         public event Action<SceneTree.Node?>? OnNodeChanged;
 
+        public int ImGuiMainMenubarHeight => 17;
+        public int ImGuiWindowWidth => 350;
         public WindowContainer Windows { get; } = new WindowContainer();
         public Game Game { get; }
         public Time Time { get; }
@@ -46,12 +49,32 @@ namespace Game.Editor
             }
         }
 
+        public void Initialize()
+        {
+            var sceneTree = new SceneTreeWindow();
+            sceneTree.OpenWindow();
+            OpenWindows.Add(sceneTree);
+
+            var gameWindow = new GameWindow();
+            gameWindow.OpenWindow();
+            OpenWindows.Add(gameWindow);
+
+            var editGame = new EditGameEntityWindow();
+            editGame.OpenWindow();
+            OpenWindows.Add(editGame);
+
+            var logWindow = new LogWindow();
+            logWindow.OpenWindow();
+            OpenWindows.Add(logWindow);
+        }
+
         public void DrawWindows()
         {
             foreach (var window in OpenWindows)
             {
                 if (window.IsOpen)
                 {
+                    window.Resize(this);
                     window.Draw(this);
                 }
             }

@@ -6,6 +6,17 @@ namespace Game.Editor.Windows
     {
         public override string Name => nameof(SceneTreeWindow);
 
+        public override void Resize(EditorState editorState)
+        {
+            ImGui.SetNextWindowPos(new System.Numerics.Vector2(
+                0.0f, 
+                editorState.ImGuiMainMenubarHeight));
+
+            ImGui.SetNextWindowSize(new System.Numerics.Vector2(
+                editorState.ImGuiWindowWidth,
+                editorState.Game.ClientSize.Y - editorState.ImGuiMainMenubarHeight));
+        }
+
         public override void Draw(EditorState editorState)
         {
             if (IsOpen &&

@@ -7,6 +7,16 @@ namespace Game.Editor.Windows
     {
         public override string Name => nameof(GameWindow);
 
+        public override void Resize(EditorState editorState)
+        {
+            ImGui.SetNextWindowPos(
+                new System.Numerics.Vector2(editorState.ImGuiWindowWidth, editorState.ImGuiMainMenubarHeight));
+
+            ImGui.SetNextWindowSize(new System.Numerics.Vector2(
+                editorState.Game.ClientSize.X - (editorState.ImGuiWindowWidth * 2), 
+                editorState.Game.ClientSize.Y - editorState.ImGuiMainMenubarHeight - 200.0f));
+        }
+
         public override void Draw(EditorState editorState)
         {
             if (IsOpen &&
