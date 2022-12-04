@@ -203,8 +203,8 @@ namespace Game
 
             _time.Update();
 
-            _inputManager.UpdateMouse(MouseState.Position, MouseState.Delta);
-            _inputManager.HandleActions(KeyboardState);
+            _inputManager.HandleMouseActions(MouseState);
+            _inputManager.HandleKeyboardActions(KeyboardState);
 
             //_controller.Update(this, _time.DeltaTimeF);
 

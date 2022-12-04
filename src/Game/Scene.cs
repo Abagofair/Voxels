@@ -7,7 +7,7 @@ namespace Game
         private readonly Game _game;
         private readonly Renderer _renderer;
         private readonly InputManager _inputManager;
-        private readonly FreeLookCamera _freeLookCamera;
+        private readonly EditorCamera _editorCamera;
         private readonly Skybox _skybox;
 
         public Scene(
@@ -21,26 +21,29 @@ namespace Game
             _inputManager = inputManager ?? throw new ArgumentNullException(nameof(inputManager));
             _skybox = skybox ?? throw new ArgumentNullException(nameof(skybox));
 
-            _freeLookCamera = new FreeLookCamera(
+            _editorCamera = new EditorCamera(
                 MathF.PI / 4.0f, 
                 (float)_game.ClientSize.X / _game.ClientSize.Y, 
                 0.01f, 
                 1000.0f);
 
-            _freeLookCamera.ViewChanged += UpdateCameraView;
-            _freeLookCamera.PerspectiveChanged += UpdateCameraPerspective;
+            _editorCamera.ViewChanged += UpdateCameraView;
+            _editorCamera.PerspectiveChanged += UpdateCameraPerspective;
 
-            _inputManager.AddKeyAction(Keys.W, _freeLookCamera.MoveForward);
-            _inputManager.AddKeyAction(Keys.A, _freeLookCamera.MoveLeft);
-            _inputManager.AddKeyAction(Keys.S, _freeLookCamera.MoveBackward);
-            _inputManager.AddKeyAction(Keys.D, _freeLookCamera.MoveRight);
+            _inputManager.AddKeyAction(Keys.W, _editorCamera.MoveForward);
+            _inputManager.AddKeyAction(Keys.A, _editorCamera.MoveLeft);
+            _inputManager.AddKeyAction(Keys.S, _editorCamera.MoveBackward);
+            _inputManager.AddKeyAction(Keys.D, _editorCamera.MoveRight);
+            _inputManager.AddMouseButtonAction(MouseButton.Right, _editorCamera.Rotate);
+            _inputManager.AddMouseButtonAction(MouseButton.Middle, _editorCamera.PedestalTruck);
+            _inputManager.AddMouseAxisAction(MouseAxis.ScrollY, _editorCamera.Dolly);
 
             //contains world transform
             var rootGameObject = GameEntityManager.Create<GameEntity>("sceneRoot", new Transform());
             SceneTree = new SceneTree(rootGameObject);
         }
 
-        public FreeLookCamera Camera => _freeLookCamera;
+        public EditorCamera Camera => _editorCamera;
         public Renderer Renderer => _renderer;
         public SceneTree SceneTree { get; }
 
@@ -48,13 +51,13 @@ namespace Game
         {
             foreach (Shader shader in AssetManager.Shaders.Values.Where(x => x.Type == ShaderType.Skybox))
             {
-                shader.SetMatrix4f("View", ref _freeLookCamera.ViewWithoutTranslation);
+                shader.SetMatrix4f("View", ref _editorCamera.ViewWithoutTranslation);
             }
 
             foreach (var shader in AssetManager.Shaders.Values.Where(x => x.Type != ShaderType.Skybox))
             {
-                shader.SetMatrix4f("View", ref _freeLookCamera.View);
-                shader.SetVec3("CameraPosition", ref _freeLookCamera.Position);
+                shader.SetMatrix4f("View", ref _editorCamera.View);
+                shader.SetVec3("CameraPosition", ref _editorCamera.Position);
             }
         }
 
@@ -62,7 +65,7 @@ namespace Game
         {
             foreach (Shader shader in AssetManager.Shaders.Values)
             {
-                shader.SetMatrix4f("Projection", ref _freeLookCamera.Projection);
+                shader.SetMatrix4f("Projection", ref _editorCamera.Projection);
             }
         }
 

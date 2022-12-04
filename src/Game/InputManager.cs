@@ -12,7 +12,8 @@ namespace Game
         private Vector2 _previousMousePosition;
 
         private Dictionary<Keys, Action<Time>> _actionsByKey = new();
-        private Dictionary<MouseAxis, Action<float, Time>> _actionsByMousAxis = new();
+        private Dictionary<MouseAxis, Action<float, Time>> _actionsByMouseAxis = new();
+        private Dictionary<MouseButton, Action<MouseState, Time>> _actionByMouseButton = new();
         private Time _time;
 
         public InputManager(Time time)
@@ -31,31 +32,66 @@ namespace Game
                 _actionsByKey[key] = actionHandler;
         }
 
-        public void AddMouseAction(MouseAxis mouseAxis, Action<float, Time> actionHandler)
+        public void AddMouseAxisAction(MouseAxis mouseAxis, Action<float, Time> actionHandler)
         {
             if (actionHandler == null) throw new ArgumentNullException(nameof(actionHandler));
 
-            if (_actionsByMousAxis.TryAdd(mouseAxis, actionHandler))
-                _actionsByMousAxis[mouseAxis] = actionHandler;
+            if (_actionsByMouseAxis.TryAdd(mouseAxis, actionHandler))
+                _actionsByMouseAxis[mouseAxis] = actionHandler;
         }
 
-        public void UpdateMouse(Vector2 mousePosition, Vector2 mouseDelta)
+        public void AddMouseButtonAction(MouseButton mouseButton, Action<MouseState, Time> actionHandler)
         {
-            _mousePosition = mousePosition;
-            _mouseDelta = mouseDelta;
+            if (actionHandler == null) throw new ArgumentNullException(nameof(actionHandler));
+
+            if (_actionByMouseButton.TryAdd(mouseButton, actionHandler))
+                _actionByMouseButton[mouseButton] = actionHandler;
+        }
+
+        public void HandleMouseActions(MouseState mouseState)
+        {
+            _mousePosition = mouseState.Position;
+            _mouseDelta = mouseState.Delta;
+
+            if (mouseState.IsAnyButtonDown)
+            {
+                foreach (KeyValuePair<MouseButton, Action<MouseState, Time>> actionMouseButton in _actionByMouseButton)
+                {
+                    if (mouseState.IsButtonDown(actionMouseButton.Key))
+                    {
+                        actionMouseButton.Value(mouseState, _time);
+                    }
+                }
+            }
 
             if (_previousMousePosition != _mousePosition)
             {
-                _mouseMovedThisFrame = true;
                 _previousMousePosition = _mousePosition;
+
+                if (_mouseDelta.X != 0 &&
+                    _actionsByMouseAxis.TryGetValue(MouseAxis.MouseX, out var action))
+                {
+                    action(_mouseDelta.X, _time);
+                }
+
+                if (_mouseDelta.Y != 0 &&
+                    _actionsByMouseAxis.TryGetValue(MouseAxis.MouseY, out action))
+                {
+                    action(_mouseDelta.Y, _time);
+                }
             }
-            else
+
+            if (mouseState.ScrollDelta.LengthFast > 0)
             {
-                _mouseMovedThisFrame = false;
+                if (mouseState.ScrollDelta.Y != 0 &&
+                    _actionsByMouseAxis.TryGetValue(MouseAxis.ScrollY, out var action))
+                {
+                    action(mouseState.ScrollDelta.Y, _time);
+                }
             }
         }
 
-        public void HandleActions(KeyboardState keyboardState)
+        public void HandleKeyboardActions(KeyboardState keyboardState)
         {
             if (keyboardState == null) throw new ArgumentNullException(nameof(keyboardState));
 
@@ -67,21 +103,6 @@ namespace Game
                     {
                         actionKey.Value(_time);
                     }
-                }
-            }
-
-            if (_mouseMovedThisFrame)
-            {
-                if (_mouseDelta.X != 0 &&
-                    _actionsByMousAxis.TryGetValue(MouseAxis.MouseX, out var action))
-                {
-                    action(_mouseDelta.X, _time);
-                }
-
-                if (_mouseDelta.Y != 0 &&
-                    _actionsByMousAxis.TryGetValue(MouseAxis.MouseY, out action))
-                {
-                    action(_mouseDelta.Y, _time);
                 }
             }
         }

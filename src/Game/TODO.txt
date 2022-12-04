@@ -1,0 +1,3 @@
+﻿#1 Better handling of a window resize - rendertarget texture resize? glViewport?
+#2 Editor camera - rotate around origin with rmb, pan up/down with mmb, select with lmb, move with wasd
+#3 import magikavoxel 'models'

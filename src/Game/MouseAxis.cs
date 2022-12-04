@@ -2,6 +2,6 @@
 {
     internal enum MouseAxis
     {
-        MouseX, MouseY
+        MouseX, MouseY, ScrollY
     }
 }
