@@ -35,7 +35,7 @@ namespace Game
             _inputManager.AddKeyAction(Keys.S, _editorCamera.MoveBackward);
             _inputManager.AddKeyAction(Keys.D, _editorCamera.MoveRight);
             _inputManager.AddMouseButtonAction(MouseButton.Right, _editorCamera.Rotate);
-            _inputManager.AddMouseButtonAction(MouseButton.Middle, _editorCamera.PedestalTruck);
+            _inputManager.AddMouseButtonAction(MouseButton.Middle, _editorCamera.VerticalHorizontal);
             _inputManager.AddMouseAxisAction(MouseAxis.ScrollY, _editorCamera.Dolly);
 
             //contains world transform

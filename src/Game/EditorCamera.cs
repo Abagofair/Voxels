@@ -97,7 +97,7 @@ namespace Game
             UpdateView();
         }
 
-        public void PedestalTruck(MouseState mouseState, Time time)
+        public void VerticalHorizontal(MouseState mouseState, Time time)
         {
             _worldPosition += _up * mouseState.Delta.Y * time.DeltaTimeF;
             _worldPosition -= _right * mouseState.Delta.X * time.DeltaTimeF;
