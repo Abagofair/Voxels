@@ -1,7 +1,7 @@
 ﻿#1 Better handling of a window resize - rendertarget texture resize? glViewport?
-#2 import magicavoxel 'models'
 #3 scene export/import
 #4 better shader / scene material handling (maybe do before #3)
 #5 better camera abstraction (literally copy+paste right now)
 #6 different input contexts - e.g. GameWindow in editor is active vs inactive, menu vs ingame
 #7 screen to world object selection and highlighting
+#8 optimize voxel chunk rendering - reduce amount of blocks, merge meshes, utilize instances

@@ -70,7 +70,6 @@ namespace Game
             var skyboxMaterial = new SkyboxMaterial(_skyBoxShader, _cubeMap);
 
             _renderer = new Renderer(ClientSize);
-            _scene = new Scene(this, _renderer, _inputManager, new Skybox(99, skyboxMaterial));
 
             _renderTargetShader = AssetManager.CreateOrGetShader("renderTargetPresent", ShaderType.RenderTargetPresent, true);
             _renderTargetQuad = Model.CreateQuadNDC();
@@ -83,15 +82,7 @@ namespace Game
                 specular = AssetManager.CreateTextureFromPng("container_specular", PixelInternalFormat.Rgb),
                 shininess = 32.0f
             });
-
-            var block0 = GameEntityManager.Create<GameEntity>("block0", new Transform());
-            GameEntityManager.AddAsDynamicRenderable(block0, new Renderable(1, _basicDiffuse, Model.CreateUnitCube()));
-            var block0Node = new SceneTree.Node(block0);
-            _scene.SceneTree.Root.Children.Add(block0Node);
-
-            var block1 = GameEntityManager.Create<GameEntity>("block1", new Transform());
-            GameEntityManager.AddAsDynamicRenderable(block1, new Renderable(2, _basicDiffuse, Model.CreateUnitCube()));
-            block0Node.Children.Add(new SceneTree.Node(block1));
+            _scene = new Scene(this, _renderer, _inputManager, new Skybox(99, skyboxMaterial));
 
             _gridShader = AssetManager.CreateOrGetShader("grid", ShaderType.Grid, true);
             _gridMaterial = new GridMaterial(_gridShader);
