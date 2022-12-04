@@ -30,14 +30,6 @@ namespace Game
             _editorCamera.ViewChanged += UpdateCameraView;
             _editorCamera.PerspectiveChanged += UpdateCameraPerspective;
 
-            _inputManager.AddKeyAction(Keys.W, _editorCamera.MoveForward);
-            _inputManager.AddKeyAction(Keys.A, _editorCamera.MoveLeft);
-            _inputManager.AddKeyAction(Keys.S, _editorCamera.MoveBackward);
-            _inputManager.AddKeyAction(Keys.D, _editorCamera.MoveRight);
-            _inputManager.AddMouseButtonAction(MouseButton.Right, _editorCamera.Rotate);
-            _inputManager.AddMouseButtonAction(MouseButton.Middle, _editorCamera.VerticalHorizontal);
-            _inputManager.AddMouseAxisAction(MouseAxis.ScrollY, _editorCamera.Dolly);
-
             //contains world transform
             var rootGameObject = GameEntityManager.Create<GameEntity>("sceneRoot", new Transform());
             SceneTree = new SceneTree(rootGameObject);
@@ -46,6 +38,39 @@ namespace Game
         public EditorCamera Camera => _editorCamera;
         public Renderer Renderer => _renderer;
         public SceneTree SceneTree { get; }
+        //TODO: Look into input contexts and changing that instead of just an ignore flag
+        public bool IgnoreInput { get; set; }
+
+        public void Initialize()
+        {
+            _inputManager.AddKeyAction(Keys.W, _editorCamera.MoveForward);
+            _inputManager.AddKeyAction(Keys.A, _editorCamera.MoveLeft);
+            _inputManager.AddKeyAction(Keys.S, _editorCamera.MoveBackward);
+            _inputManager.AddKeyAction(Keys.D, _editorCamera.MoveRight);
+            _inputManager.AddMouseButtonAction(MouseButton.Right, _editorCamera.Rotate);
+            _inputManager.AddMouseButtonAction(MouseButton.Middle, _editorCamera.VerticalHorizontal);
+            _inputManager.AddMouseAxisAction(MouseAxis.ScrollY, _editorCamera.Dolly);
+
+            foreach (var item in SceneTree.GetDirectionalLights())
+            {
+                foreach (var shader in AssetManager.Shaders.Values.Where(x => x.Type == ShaderType.MaterialShader))
+                {
+                    item.Upload(shader);
+                    Logger.Debug($"Uploaded directional light for {item}");
+                }
+            }
+
+            UpdateCameraView();
+            UpdateCameraPerspective();
+        }
+
+        public void UpdateInput(KeyboardState keyboardState, MouseState mouseState)
+        {
+            if (IgnoreInput) return;
+
+            _inputManager.HandleKeyboardActions(keyboardState);
+            _inputManager.HandleMouseActions(mouseState);
+        }
 
         private void UpdateCameraView()
         {
@@ -67,21 +92,6 @@ namespace Game
             {
                 shader.SetMatrix4f("Projection", ref _editorCamera.Projection);
             }
-        }
-
-        public void Initialize()
-        {
-            foreach (var item in SceneTree.GetDirectionalLights())
-            {
-                foreach (var shader in AssetManager.Shaders.Values.Where(x => x.Type == ShaderType.MaterialShader))
-                {
-                    item.Upload(shader);
-                    Logger.Debug($"Uploaded directional light for {item}");
-                }
-            }
-
-            UpdateCameraView();
-            UpdateCameraPerspective();
         }
 
         public void Update(Time time)

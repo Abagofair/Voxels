@@ -1,13 +1,8 @@
-﻿using Game.Debug;
-using Game.Editor;
+﻿using Game.Editor;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
-using OpenTK.Windowing.GraphicsLibraryFramework;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
 
 namespace Game
 {
@@ -16,13 +11,10 @@ namespace Game
         private DirectionalLight _directionalLight;
 
         private Shader? _shader;
-        private FreeLookCamera? _camera;
 
         private Shader? _gridShader;
-        private Thing? _gridThing;
 
         private Shader? _skyBoxShader;
-        private Model? _skyBoxCube;
 
         private Shader? _stencilShader;
 
@@ -114,8 +106,6 @@ namespace Game
             
             //TAG LIGE NOGLE FUCKING NOTER SÅ DU IKKE GLEMMER ALT DET HER FRA MODEL TO PROJECTION DEPTH BUFFER LORT
 
-            _camera = new FreeLookCamera(MathF.PI / 4.0f, (float)ClientSize.X / (float)ClientSize.Y, 0.01f, 1000.0f);
-
             _directionalLight = new DirectionalLight(2, "SunLight", new Transform())
             {
                 direction = new Vector3(0.0f, -1.0f, 0.0f),
@@ -129,39 +119,6 @@ namespace Game
             _scene.SceneTree.Root.Children.Add(new SceneTree.Node(_directionalLight));
 
             _scene.Initialize();
-
-            //_inputManager.AddMouseAction(MouseAxis.MouseX, _camera.MouseX);
-            //_inputManager.AddMouseAction(MouseAxis.MouseY, _camera.MouseY);
-
-            _inputManager.AddKeyAction(Keys.Escape, (_) =>
-            {
-                if (CursorState == CursorState.Grabbed)
-                    CursorState = CursorState.Normal;
-                else
-                    CursorState = CursorState.Grabbed;
-            });
-
-            _inputManager.AddKeyAction(Keys.T, (_) =>
-            {
-                //GL.BindFramebuffer(FramebufferTarget.Framebuffer, _frameBuffer);
-                var pixels = new byte[ClientSize.X * ClientSize.Y * 4];
-                GL.ReadPixels(
-                    0,
-                    0,
-                    ClientSize.X,
-                    ClientSize.Y,
-                    PixelFormat.Rgba,
-                    PixelType.UnsignedByte,
-                    pixels);
-
-                using (var image = SixLabors.ImageSharp.Image.LoadPixelData<Rgba32>(pixels, ClientSize.X, ClientSize.Y))
-                {
-                    image.Mutate(x => x.Flip(FlipMode.Vertical));
-                    image.SaveAsPng($"screenshot_{DateTimeOffset.UtcNow.Ticks}.png");
-                }
-                //GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
-                //i.SaveAsPng("test");
-            });
 
             _time.Start();
 
@@ -189,12 +146,8 @@ namespace Game
             base.OnResize(e);
 
             GL.Viewport(0, 0, e.Width, e.Height);
-
-            if (_camera!= null)
-            {
-                _camera.AspectRatio = (float)e.Width / e.Height;
-                _controller.WindowResized(e.Width, e.Height);
-            }
+            ActiveScene.Camera.AspectRatio = (float)e.Width / e.Height;
+            _controller.WindowResized(e.Width, e.Height);
         }
 
         protected override void OnUpdateFrame(FrameEventArgs args)
@@ -203,12 +156,8 @@ namespace Game
 
             _time.Update();
 
-            _inputManager.HandleMouseActions(MouseState);
-            _inputManager.HandleKeyboardActions(KeyboardState);
-
-            //_controller.Update(this, _time.DeltaTimeF);
-
-            _scene.Update(_time);
+            ActiveScene.UpdateInput(KeyboardState, MouseState);
+            ActiveScene.Update(_time);
         }
         
         protected override void OnRenderFrame(FrameEventArgs args)

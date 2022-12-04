@@ -17,6 +17,15 @@ namespace Game.Editor
         public void Initialize()
         {
             _editorState.Initialize();
+            _editorState.OnWindowChanged += _editorState_OnWindowChanged;
+        }
+
+        private void _editorState_OnWindowChanged(Window? obj)
+        {
+            if (obj is GameWindow)
+                _editorState.Game.ActiveScene.IgnoreInput = false;
+            else
+                _editorState.Game.ActiveScene.IgnoreInput = true;
         }
 
         public void Show()
@@ -83,51 +92,5 @@ namespace Game.Editor
                 ImGui.End();
             }
         }
-
-        /*
-
-        public void SetupCreateEntityMenu(SceneTree.Node node)
-        {
-            //$"Add entity to parent {parent.GameEntity.Name}"
-            if (ImGui.BeginPopup("CreateEntityMenu"))
-            {
-                if (ImGui.Selectable("Add block"))
-                {
-                    var shader = AssetManager.CreateOrGetShader("quad", ShaderType.MaterialShader, false);
-                    var dif = new BasicMaterial(shader, new MaterialProperties()
-                    {
-                        ambient = new Vector3(1.0f, 0.5f, 0.31f),
-                        diffuse = AssetManager.CreateTextureFromPng("container_diffuse", PixelInternalFormat.Srgb),
-                        specular = AssetManager.CreateTextureFromPng("container_specular", PixelInternalFormat.Rgb),
-                        shininess = 32.0f
-                    });
-
-                    var block0 = GameEntityManager.Create<GameEntity>($"block_{Guid.NewGuid()}", new Transform());
-                    GameEntityManager.AddAsDynamicRenderable(block0, new Renderable(1, dif, Model.CreateUnitCube()));
-                    var block0Node = new SceneTree.Node(block0);
-                    node.Children.Add(block0Node);
-                }
-
-                ImGui.EndPopup();
-            }
-        }
-
-        public void EditGameEntityMenu(GameEntity gameEntity)
-        {
-            if (EditorState.EditEntityWindow &&
-                ImGui.Begin(nameof(EditorState.EditEntityWindow), ref EditorState.EditEntityWindow))
-            {
-                var position = new System.Numerics.Vector3(
-                    gameEntity.Transform.Position.X,
-                    gameEntity.Transform.Position.Y,
-                    gameEntity.Transform.Position.Z);
-
-                ImGui.InputFloat3("Position", ref position);
-
-                gameEntity.Transform.Position = new Vector3(position.X, position.Y, position.Z);
-
-                ImGui.End();
-            }
-        }*/
     }
 }

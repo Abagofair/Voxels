@@ -75,6 +75,11 @@ namespace Game
             //GL.Viewport(0, 0, ViewportSize.X, ViewportSize.Y);
         }
 
+        public static void Unbind()
+        {
+            GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+        }
+
         public void Dispose()
         {
             GL.DeleteFramebuffer(_frameBufferId);

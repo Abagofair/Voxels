@@ -13,12 +13,12 @@ namespace Game
             _handle = GL.GenTexture();
             GL.BindTexture(TextureTarget.TextureCubeMap, _handle);
 
-            CreateSide(images.Top, TextureTarget.TextureCubeMapPositiveX);
+            CreateSide(images.Right, TextureTarget.TextureCubeMapPositiveX);
             CreateSide(images.Left, TextureTarget.TextureCubeMapNegativeX);
-            CreateSide(images.Front, TextureTarget.TextureCubeMapPositiveY);
-            CreateSide(images.Right, TextureTarget.TextureCubeMapNegativeY);
-            CreateSide(images.Back, TextureTarget.TextureCubeMapPositiveZ);
-            CreateSide(images.Bottom, TextureTarget.TextureCubeMapNegativeZ);
+            CreateSide(images.Top, TextureTarget.TextureCubeMapPositiveY);
+            CreateSide(images.Bottom, TextureTarget.TextureCubeMapNegativeY);
+            CreateSide(images.Front, TextureTarget.TextureCubeMapPositiveZ);
+            CreateSide(images.Back, TextureTarget.TextureCubeMapNegativeZ);
 
             GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
             GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMinFilter, (int)TextureMagFilter.Linear);

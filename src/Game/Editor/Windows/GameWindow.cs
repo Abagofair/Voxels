@@ -22,12 +22,13 @@ namespace Game.Editor.Windows
             if (IsOpen &&
                 ImGui.Begin(Name, ref IsOpen))
             {
+                ImGui.BeginChild("Render");
+                
                 if (ImGui.IsWindowFocused())
                 {
                     editorState.ActiveWindow = this;
                 }
 
-                ImGui.BeginChild("Render");
                 editorState.Game.ActiveScene.Renderer.RenderTarget.ViewportSize
                     = new Vector2i((int)ImGui.GetWindowSize().X, (int)ImGui.GetWindowSize().Y);
                 float newAspectRatio 

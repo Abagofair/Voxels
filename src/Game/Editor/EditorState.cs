@@ -55,10 +55,6 @@ namespace Game.Editor
             sceneTree.OpenWindow();
             OpenWindows.Add(sceneTree);
 
-            var gameWindow = new GameWindow();
-            gameWindow.OpenWindow();
-            OpenWindows.Add(gameWindow);
-
             var editGame = new EditGameEntityWindow();
             editGame.OpenWindow();
             OpenWindows.Add(editGame);
@@ -66,6 +62,11 @@ namespace Game.Editor
             var logWindow = new LogWindow();
             logWindow.OpenWindow();
             OpenWindows.Add(logWindow);
+
+            var gameWindow = new GameWindow();
+            gameWindow.OpenWindow();
+            OpenWindows.Add(gameWindow);
+            ActiveWindow = gameWindow;
         }
 
         public void DrawWindows()
