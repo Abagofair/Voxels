@@ -1,6 +1,5 @@
 ﻿using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
-using static System.Formats.Asn1.AsnWriter;
 
 namespace Game
 {
