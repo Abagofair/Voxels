@@ -57,6 +57,12 @@
     <None Update="Assets\Shaders\stencil.vert">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Assets\Shaders\voxel_chunk.frag">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Assets\Shaders\voxel_chunk.vert">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Assets\Textures\SkyCubeMap\back.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -38,8 +38,8 @@ namespace Game
             var rootGameObject = GameEntityManager.Create<GameEntity>("sceneRoot", new Transform());
             SceneTree = new SceneTree(rootGameObject);
             var importer = new Importer();
-            _chunks = importer.Import("Assets\\Models\\monu2.vox");
-            var shader = new BasicMaterial(AssetManager.CreateOrGetShader("quad", ShaderType.MaterialShader, false), new MaterialProperties()
+            _chunks = importer.Import("Assets\\Models\\chr_knight.vox");
+            var shader = new BasicMaterial(AssetManager.CreateOrGetShader("voxel_chunk", ShaderType.MaterialShader, true), new MaterialProperties()
             {
                 ambient = new Vector3(1.0f, 0.5f, 0.31f),
                 diffuse = AssetManager.CreateTextureFromPng("container_diffuse", PixelInternalFormat.Srgb),

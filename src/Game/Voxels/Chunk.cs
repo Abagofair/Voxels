@@ -29,7 +29,7 @@ namespace Game.Voxels
                         vertex.Position + new OpenTK.Mathematics.Vector3(chunk.Blocks[i].Position.X, chunk.Blocks[i].Position.Y, chunk.Blocks[i].Position.Z),
                         vertex.Normal,
                         vertex.Uv,
-                        new OpenTK.Mathematics.Vector4(chunk.Blocks[i].Color.X, chunk.Blocks[i].Color.Y, chunk.Blocks[i].Color.Z, 1.0f));
+                        new OpenTK.Mathematics.Vector4(chunk.Blocks[i].Color.X, chunk.Blocks[i].Color.Y, chunk.Blocks[i].Color.Z, chunk.Blocks[i].Color.W));
                 }
             }
 

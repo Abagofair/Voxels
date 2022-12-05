@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using System.Runtime.Serialization.Formatters;
 using System.Text;
 
 namespace MagicaVoxelImporter
@@ -57,12 +58,12 @@ namespace MagicaVoxelImporter
                 voxelCoordinates[i] = ReadVector4(fileStream, ref currentOffset);
             }
 
-            Vector4[] palette = new Vector4[255];
+            Vector4[] palette = new Vector4[256];
             byte[] content = new byte[fileStream.Length - currentOffset];
 
             var str = new byte[4];
             fileStream.Read(content, 0, content.Length);
-            for (int i = 0; i < content.Length - 3; ++i)
+            for (int i = 0; i < content.Length; ++i)
             {
                 str[0] = content[i];
                 str[1] = content[i+1];
@@ -73,13 +74,18 @@ namespace MagicaVoxelImporter
                 if (r == RgbaChunkid)
                 {
                     i += 4;
-                    for (int j = 0; j < palette.Length; ++j)
+                    i += 4;
+                    i += 4;
+
+                    for (int j = 0; j <= 254; ++j)
                     {
-                        palette[j] = new Vector4(
-                            content[i+j] / 255.0f,
-                            content[i+j+1] / 255.0f,
+                        palette[j+1] = new Vector4(
+                            content[i + j] / 255.0f,
+                            content[i + j + 1] / 255.0f,
                             content[i + j + 2] / 255.0f,
                             content[i + j + 3] / 255.0f);
+
+                        i += 3;
                     }
                     break;
                 }
@@ -93,7 +99,7 @@ namespace MagicaVoxelImporter
                 blocks[i] = new Block()
                 {
                     Position = new Vector3(voxel.X, voxel.Z, voxel.Y),
-                    Color = palette[(int)voxel.W - 1]
+                    Color = palette[(int)voxel.W]
                 };
             }
 
