@@ -21,10 +21,10 @@ namespace Game
             get
             {
                 _matrix =
-                    Parent *
                     Matrix4.CreateScale(Scale) *
                     Matrix4.CreateFromQuaternion(Quaternion.FromEulerAngles(Pitch, Yaw, Roll)) *
-                    Matrix4.CreateTranslation(Position);
+                    Matrix4.CreateTranslation(Position) *
+                    Parent;
 
                 return ref _matrix;
             }

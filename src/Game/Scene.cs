@@ -37,9 +37,8 @@ namespace Game
             //contains world transform
             var rootGameObject = GameEntityManager.Create<GameEntity>("sceneRoot", new Transform());
             SceneTree = new SceneTree(rootGameObject);
-
             var importer = new Importer();
-            _chunks = importer.Import("Assets\\Models\\chr_knight.vox");
+            _chunks = importer.Import("Assets\\Models\\monu2.vox");
             var shader = new BasicMaterial(AssetManager.CreateOrGetShader("quad", ShaderType.MaterialShader, false), new MaterialProperties()
             {
                 ambient = new Vector3(1.0f, 0.5f, 0.31f),
@@ -53,17 +52,18 @@ namespace Game
             });
             var root = new SceneTree.Node(block0);
             SceneTree.Root.Children.Add(root);
-            GameEntityManager.AddAsDynamicRenderable(block0, new Renderable(0, shader, Model.CreateUnitCube()));
-            for (int i = 0; i < _chunks[0].Blocks.Length; i++)
-            {
-                MagicaVoxelImporter.Block? block = _chunks[0].Blocks[i];
-                var blockIn = GameEntityManager.Create<GameEntity>($"block_{i+2}", new Transform()
-                {
-                    Position = new Vector3(block.Position.X, block.Position.Y, block.Position.Z),
-                });
-                GameEntityManager.AddAsDynamicRenderable(blockIn, new Renderable(i+2, shader, Model.CreateUnitCube()));
-                root.Children.Add(new SceneTree.Node(blockIn));
-            }
+            
+            GameEntityManager.AddAsDynamicRenderable(block0, new Renderable(0, shader, new Voxels.Chunk(_chunks[0])));
+            //for (int i = 0; i < _chunks[0].Blocks.Length; i++)
+            //{
+            //    MagicaVoxelImporter.Block? block = _chunks[0].Blocks[i];
+            //    var blockIn = GameEntityManager.Create<GameEntity>($"block_{i+2}", new Transform()
+            //    {
+            //        Position = new Vector3(block.Position.X, block.Position.Y, block.Position.Z),
+            //    });
+            //    GameEntityManager.AddAsDynamicRenderable(blockIn, new Renderable(i+2, shader, Model.CreateUnitCube()));
+            //    root.Children.Add(new SceneTree.Node(blockIn));
+            //}
         }
 
         public EditorCamera Camera => _editorCamera;

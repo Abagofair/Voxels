@@ -1,4 +1,5 @@
-﻿using OpenTK.Graphics.OpenGL4;
+﻿using Game.Voxels;
+using OpenTK.Graphics.OpenGL4;
 
 namespace Game
 {
@@ -6,16 +7,16 @@ namespace Game
     {
         private readonly int _id;
         private Material _material;
-        private Model _model;
+        private IDrawable _drawable;
 
         public Renderable(
             int id,
             Material material,
-            Model model)
+            IDrawable drawable)
         {
             _id = id;
             _material = material ?? throw new ArgumentNullException(nameof(material));
-            _model = model ?? throw new ArgumentNullException(nameof(model));
+            _drawable = drawable ?? throw new ArgumentNullException(nameof(drawable));
         }
 
         public Transform? Transform { get; set; }
@@ -41,7 +42,7 @@ namespace Game
             }
 
             _material.Apply();
-            _model.Draw();
+            _drawable.Draw();
 
             RemoveState();
         }
